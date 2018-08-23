@@ -17,6 +17,10 @@ using Orleans.Streams;
 
 namespace MQTTnet.Orleans
 {
+    /// <summary>
+    /// A representation of an MQTT Server with hooks to work with an Orleans backplane.  This allows actors to address devices no matter which instance of
+    /// an Mqtt Server it is connected to, so long as that server is connected with an Orleans Silo that has been setup to talk with devices.
+    /// </summary>
     public class OrleansManagedMqttServer : MqttServer, IHostedService
     {
         readonly IClusterClient _clusterClient;

@@ -12,6 +12,9 @@ using Orleans;
 
 namespace MQTTnet.Orleans
 {
+    /// <summary>
+    /// Until this can be merged as appropriate, these extension methods are available to an MqttFactory to allow the instantiation of an Orleans MQTT Server in a fluid manner.
+    /// </summary>
     public static class MqttFactoryExtensions
     {
         public static IMqttServer CreateOrleansMqttSever(this MqttFactory factory, IClusterClient clusterClient, IMqttServerOptions options, ILoggerFactory appLoggerFactory)

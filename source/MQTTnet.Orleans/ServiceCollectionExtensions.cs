@@ -11,7 +11,9 @@ namespace MQTTnet.AspNetCore
 {
     public static class ServiceCollectionExtensions
     {
-
+        /// <summary>
+        /// For use with building a silo, this will wire-up the "orleans" flavor of the MQTTserver object and its supporting infrastructure.
+        /// </summary>
         public static IServiceCollection AddHostedOrleansMqttServer(this IServiceCollection services, Action<MqttServerOptionsBuilder> configure)
         {
             var builder = new MqttServerOptionsBuilder();
@@ -25,6 +27,9 @@ namespace MQTTnet.AspNetCore
             return services;
         }
 
+        /// <summary>
+        /// For use with building a silo, this will wire-up the "orleans" flavor of the MQTTserver object and its supporting infrastructure.
+        /// </summary>
         private static IServiceCollection AddHostedOrleansMqttServer(this IServiceCollection services)
         {
             var logger = new MqttNetLogger();
