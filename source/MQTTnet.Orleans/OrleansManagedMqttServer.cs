@@ -11,7 +11,9 @@ using MQTTnet;
 using MQTTnet.Adapter;
 using MQTTnet.Diagnostics;
 using MQTTnet.Server;
+
 using Newtonsoft.Json;
+
 using Orleans;
 using Orleans.Streams;
 
@@ -52,22 +54,38 @@ namespace MQTTnet.Orleans
 
         async void This_OnClientConnected(object sender, MqttClientConnectedEventArgs args)
         {
-            _appLogger.LogInformation("OnClientConnected fired.");
-
-            if (_streamProvider == null)
+            try
             {
-                _appLogger.LogInformation("Stream Provider is available... setting up streams.");
-                await SetupStreams(args);
-            }
+                _appLogger.LogInformation("OnClientConnected fired.");
 
-            var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
-            await device.OnConnect(_serverId, args.ClientId);
+                if (_streamProvider == null)
+                {
+                    _appLogger.LogInformation("Stream Provider is available... setting up streams.");
+                    await SetupStreams(args);
+                }
+
+                var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
+                await device.OnConnect(_serverId, args.ClientId);
+            }
+            catch (Exception exc)
+            {
+                // I would like to detail this out more, but could use guidance on howto do so where it would be relevant.
+                _appLogger.LogCritical(exc, "Failed during client-connect.  Examine exception object for details.");
+            }
         }
         async void This_OnClientDisconnected(object sender, MqttClientDisconnectedEventArgs args)
         {
-            _appLogger.LogInformation($"Disconnecting {args.ClientId}..");
-            var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
-            await device.OnDisconnect();
+            try
+            {
+                _appLogger.LogInformation($"Disconnecting {args.ClientId}..");
+                var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
+                await device.OnDisconnect();
+            }
+            catch (Exception exc)
+            {
+                // I would like to detail this out more, but could use guidance on howto do so where it would be relevant.
+                _appLogger.LogCritical(exc, "Failed during client-disconnect.  Examine exception object for details.");
+            }
         }
 
         async Task SetupStreams(MqttClientConnectedEventArgs args)
