@@ -46,3 +46,41 @@ public void ConfigureServices(IServiceCollection services)
 }
 
 ```
+
+## Nginx Ingress Configuration ##
+
+If using WebSockets, ensure that you not only set the kubernetes ingress to enable websockets with the `nginx.ingress.kubernetes.io/websocket-services` annotation, but also include the affinity, session cookie hash, and session cookie neame annotations.  Without these items, your clients will not be kicked between reloads of the mqtt websocket service.
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {your service}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.org/websocket-services: "{your service}"
+    nginx.ingress.kubernetes.io/websocket-services: "{your service}"
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-hash: sha1
+    nginx.ingress.kubernetes.io/session-cookie-name: REALTIMESERVERID
+    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "64k"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts: 
+    - host1.domain.com
+    - host2.domain.com
+    - host3.domain.com
+    secretName: tls-secret
+  rules:
+  - host: host1.domain.com
+    http:
+      paths:
+      - path: /bus
+        backend:
+          serviceName: {your service}
+          servicePort: 5000
+```
