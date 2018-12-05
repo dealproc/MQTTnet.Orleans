@@ -64,7 +64,7 @@ namespace MQTTnet.Orleans
                     await SetupStreams(args);
                 }
 
-                var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
+                var device = _clusterClient.GetGrain<IDeviceGrain>(args.ClientId);
                 await device.OnConnect(_serverId, args.ClientId);
             }
             catch (Exception exc)
@@ -78,7 +78,7 @@ namespace MQTTnet.Orleans
             try
             {
                 _appLogger.LogInformation($"Disconnecting {args.ClientId}..");
-                var device = _clusterClient.GetGrain<IDeviceGrain>(Utils.BuildDeviceId(args.ClientId));
+                var device = _clusterClient.GetGrain<IDeviceGrain>(args.ClientId);
                 await device.OnDisconnect();
             }
             catch (Exception exc)
