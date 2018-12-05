@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using sample.web.Models;
@@ -45,6 +46,19 @@ namespace sample.web.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Ping()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PingAsync()
+        {
+            var device = _clusterClient.GetGrain<grains.IMyLogicalDevice>("device1");
+            await device.PingAsync();
+            return View("Ping");
         }
     }
 }
