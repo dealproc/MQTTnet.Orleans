@@ -65,7 +65,7 @@ namespace MQTTnet.Orleans
                 }
 
                 var device = _clusterClient.GetGrain<IDeviceGrain>(args.ClientId);
-                await device.OnConnect(_serverId, args.ClientId);
+                await device.OnConnect(_serverId, Environment.MachineName, args.ClientId);
             }
             catch (Exception exc)
             {

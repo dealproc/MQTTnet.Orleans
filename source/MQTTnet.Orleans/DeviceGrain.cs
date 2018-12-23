@@ -15,9 +15,14 @@ namespace MQTTnet.Orleans
     public interface IDeviceGrain : IGrainWithStringKey
     {
         /// <summary>
+        /// Provides status information about the device, including online/offline and what machine the device is connected to.
+        /// </summary>
+        Task<DeviceStatus> ObtainStatusAsync();
+
+        /// <summary>
         /// Method that executes upon a device connecting the the Mqtt Server.  Basic setup is to connect it within a grain to allow it to be addressed by the silo.
         /// </summary>
-        Task OnConnect(Guid serverId, string connectionId);
+        Task OnConnect(Guid serverId, string machineName, string connectionId);
 
         /// <summary>
         /// When the device disconnects, this method is executed to do cleanup of the connection and supporting grain objects.
@@ -34,11 +39,22 @@ namespace MQTTnet.Orleans
     /// Implementation of a device that is connected to an Mqtt Server.
     /// </summary>
     [StorageProvider(ProviderName = OrleansMqttConstants.StorageProvider)]
-    internal class DeviceGrain : Grain<DeviceState>, IDeviceGrain
+    public class DeviceGrain : Grain<DeviceState>, IDeviceGrain
     {
         IStreamProvider _streamProvider;
         IAsyncStream<ClientMessage> _serverStream;
         IAsyncStream<string> _clientDisconnectStream;
+
+        public Task<DeviceStatus> ObtainStatusAsync()
+        {
+            var status = new DeviceStatus()
+            {
+                ConnectedTo = State.MachineName,
+                IsOnline = this.State.ServerId != Guid.Empty && !string.IsNullOrWhiteSpace(this.State.ConnectionId)
+            };
+
+            return Task.FromResult(status);
+        }
 
         /// <summary>
         /// Wires-up the grain upon access from within the silo.
@@ -59,9 +75,10 @@ namespace MQTTnet.Orleans
         /// <summary>
         /// Method that executes upon a device connecting the the Mqtt Server.  Basic setup is to connect it within a grain to allow it to be addressed by the silo.
         /// </summary>
-        public Task OnConnect(Guid serverId, string connectionId)
+        public Task OnConnect(Guid serverId, string machineName, string connectionId)
         {
             State.ServerId = serverId;
+            State.MachineName = machineName;
             State.ConnectionId = connectionId;
 
             _serverStream = _streamProvider.GetStream<ClientMessage>(State.ServerId, OrleansMqttConstants.ServersStream);
@@ -99,7 +116,8 @@ namespace MQTTnet.Orleans
         }
     }
 
-    internal class DeviceState
+    [Serializable]
+    public class DeviceState
     {
         /// <summary>
         /// The server (id) that this device is connected to.
@@ -107,8 +125,20 @@ namespace MQTTnet.Orleans
         public Guid ServerId { get; set; }
 
         /// <summary>
+        /// The machine which the connected device communicates with.
+        /// </summary>
+        public string MachineName { get; set; }
+
+        /// <summary>
         /// [Should probably be renamed to ClientId] The connection id that is associated with this device.
         /// </summary>
         public string ConnectionId { get; set; }
+    }
+
+    [Serializable]
+    public class DeviceStatus
+    {
+        public bool IsOnline { get; set; }
+        public string ConnectedTo { get; set; }
     }
 }
