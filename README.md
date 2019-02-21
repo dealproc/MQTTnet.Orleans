@@ -1,3 +1,11 @@
+# Temporarily Archiving This Repository
+
+Due to the fact that the MQTT Server classes are not yet 100% stable, this repository will be archived for the time being.  If/when the libraries are finally stabilized, this repository will be re-activated and updated to use the newer MQTTnet libraries (possibly the v3.x libs, but definitely TBD)
+
+If the server libs become stable, and the repository is not yet re-activated, please contact me: duncan16 at comcast.net and I will put the time in to update this library to support the server architecture for those that are using Orleans as a backplane.
+
+Thanks!
+
 # MQTTnet.Orleans
 
 Although MQTTnet has both a client and server component within its library, there is no ability natively to load-balance the work across multiple host nodes.  MQTTnet.Orleans is an implementation using Orleans as a backplane to enable load-balancing scenarios, with the added benefit of allowing any Orleans Client the ability to address the device without needing a significant amount of infrastructure.
